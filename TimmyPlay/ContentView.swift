@@ -16,6 +16,10 @@ struct ContentView: View {
     @State var viewID = 1
     @State var player: AVAudioPlayer?
     @State var currentLevelIndex: Int = 0
+    @State private var timeRemaining: Double?
+    @State private var levelStartTime: Date?
+    @State var useTimer: Bool = true
+    @State private var gameMode: GameMode = .menu
     
     let levels = LevelConfig.generate()
     
@@ -29,6 +33,26 @@ struct ContentView: View {
     }
     
     var body: some View {
+        Group {
+            switch gameMode {
+            case .menu:
+                MenuView {
+                    useTimer = true
+                    gameMode = .timeAttack
+                    resetGame()
+                } onStartCasual: {
+                    useTimer = false
+                    gameMode = .casual
+                    resetGame()
+                }
+            case .timeAttack, .casual:
+                gameView
+                
+            }
+        }
+    }
+    
+    var gameView: some View {
         ZStack {
             LinearGradient(
                 gradient: Gradient(colors: [
@@ -51,10 +75,11 @@ struct ContentView: View {
                     )
                     .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 3)
                     .padding(.top, 30)
+                
                 GameView(intgridSize: $gridSize, gamePoints: $gamePoints, gameState: $gameState)
                     .id(viewID)
                 
-                    
+                
             }
             .onChange(of: gameState) { _ in
                 guard currentLevelIndex < levels.count else {
@@ -63,35 +88,98 @@ struct ContentView: View {
                 guard gameState != .playing else {
                     return
                 }
-                playSound(named: "csgo-sound.mp3")
-                print("State of the game: \(self.gameState)")
-                self.gamePoints = Self.generateGamePoints(levels[currentLevelIndex])
-                self.gridSize = levels[currentLevelIndex].gridSize
-                self.viewID += 1
-                self.currentLevelIndex += 1
-                gameState = .playing
+                if gameState == .lost {
+                    playSound(named: "icq-sound.mp3")
+                    resetGame()
+                    return
+                }
+                startGame()
                 
             }
             .aspectRatio(1, contentMode: .fit)
             .padding()
             
-            VStack {
-                HStack {
-                    Spacer()
-                    Text(
-                        "Level: \(levels[currentLevelIndex].number)  Points: \(levels[currentLevelIndex].pointCount)"
+            
+            if useTimer {
+                TimelineView(
+                    .animation
+                ) { timeline in
+                    let elapsed = timeline.date.timeIntervalSince(levelStartTime ?? timeline.date)
+                    let remaining = max(
+                        0,
+                        levels[currentLevelIndex].timeLimit! - elapsed
                     )
-                    .padding(.trailing, 40)
-                    .padding(.top, 20)
                     
-                    .font(
-                        .system(size: 33, weight: .semibold, design: .rounded)
-                    )
+                    VStack {
+                        HStack {
+                                Button(action: {
+                                    gameMode = .menu
+                                }) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                                        .foregroundStyle(Color(.black))
+                                        .frame(width: 40, height: 40)
+                                        .background(.ultraThinMaterial, in: Circle())
+                                        .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
+                                }
+                                .padding(.leading, 20)
+                                .padding(.top, 20)
+                                
+                            Spacer()
+                            
+                            
+                            Text(String(format: "Timer: %.0f seconds", remaining))
+                                .font(.system(size: 33, weight: .bold, design: .rounded))
+                                .foregroundStyle(remaining < 5 ? .red : .black)
+                                .padding(.horizontal, 2)
+                                .padding(.vertical, 6)
+                                .background(.ultraThinMaterial, in: Capsule())
+                                .padding(.trailing, 20)
+                            
+                            Text("Level \(levels[currentLevelIndex].number)")
+                                .font(
+                                    .system(size: 33, weight: .bold, design: .rounded)
+                                )
+                                .padding(.horizontal, 30)
+                        }
+                        .padding(.top, 20)
+                        Spacer()
+                    }
+                    .onChange(of: remaining) { newValue in
+                        if newValue <= 0 {
+                            gameState = .lost
+                        }}
+                }.onAppear {
+                    if levels[currentLevelIndex].timeLimit != nil {
+                        levelStartTime = Date()
+                    }
                 }
-                Spacer()
+            } else {
+                VStack {
+                    HStack {
+                            Button(action: {
+                                gameMode = .menu
+                            }) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                                    .foregroundStyle(Color(.black))
+                                    .frame(width: 40, height: 40)
+                                    .background(.ultraThinMaterial, in: Circle())
+                                    .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
+                            }
+                            .padding(.leading, 20)
+                            .padding(.top, 20)
+                            
+                        Spacer()
+                        Text("Level \(levels[currentLevelIndex].number)")
+                            .font(.system(size: 33, weight: .bold, design: .rounded))
+                            .padding(.trailing, 20)
+                    }
+                    .padding(.top, 20)
+                    Spacer()
+                }
             }
         }
-        
         
     }
     
@@ -124,6 +212,25 @@ struct ContentView: View {
         } catch {
             print("Error playing sound: \(error.localizedDescription)")
         }
+    }
+    
+    func resetGame() {
+        currentLevelIndex = 0
+        self.gamePoints = Self.generateGamePoints(levels[currentLevelIndex])
+        self.gridSize = levels[currentLevelIndex].gridSize
+        gameState = .playing
+        self.viewID += 1
+        levelStartTime = Date()
+    }
+    
+    func startGame() {
+        playSound(named: "csgo-sound.mp3")
+        print("State of the game: \(self.gameState)")
+        self.gamePoints = Self.generateGamePoints(levels[currentLevelIndex])
+        self.gridSize = levels[currentLevelIndex].gridSize
+        self.viewID += 1
+        self.currentLevelIndex += 1
+        gameState = .playing
     }
     
 }

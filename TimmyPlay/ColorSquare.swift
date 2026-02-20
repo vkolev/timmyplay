@@ -10,6 +10,7 @@ import AVFoundation
 struct ColorSquare: View {
     @State var color: Color
     @Binding var gamePoints: [GridPosition]
+    @Binding var gameState: GameState
     @State var player: AVAudioPlayer?
     let frameSize: CGFloat
     let position: GridPosition
@@ -43,7 +44,7 @@ struct ColorSquare: View {
                     .onEnded { _ in
                         if (color == .gray) {
                             // play sound oh-oh
-                            playSound(named: "icq-sound.mp3")
+                            gameState = .lost
                         } else {
                             // play sound yeah
                             playSound(named: "pop-sound.mp3")
@@ -84,6 +85,7 @@ struct ColorSquare: View {
             ColorSquare(
                 color: .pink,
                 gamePoints: $gamePoints,
+                gameState: $gameState,
                 frameSize: 300,
                 position: GridPosition(row: 0, col: 0)
             )

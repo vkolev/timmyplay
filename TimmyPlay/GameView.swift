@@ -34,6 +34,7 @@ struct GameView: View {
                                         point: position
                                     ) ? .pink : .gray,
                                     gamePoints: $gamePoints,
+                                    gameState: $gameState,
                                     frameSize: cellSize,
                                     position: position
                                 )

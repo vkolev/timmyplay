@@ -21,27 +21,27 @@ struct LevelConfig {
             case 1...10:
                 gridSize = 4
                 pointCount = 4 + (level - 1) / 3
-                timeLimit = nil
+                timeLimit = 40.0
             case 11...50:
                 gridSize = 5
                 pointCount = 6 + (level - 11) / 5
-                timeLimit = nil
+                timeLimit = 35.0
             case 26...45:
                 gridSize = 6
                 pointCount = 9 + (level - 26) / 7
-                timeLimit = nil // possible limit level > 35 ? 30.0 : nil
+                timeLimit = level > 35 ? 30.0 : nil
             case 46...70:
                 gridSize = 7
                 pointCount = 14 + (level - 46) / 12
-                timeLimit = nil // 30.0 - Double(level - 46) * 0.2
+                timeLimit = 30.0 - Double(level - 46) * 0.2
             case 71...100:
                 gridSize = 8
                 pointCount = 14 + (level - 71) / 15
-                timeLimit = nil // 20 - Double(level - 71) * 0.1
+                timeLimit = 20 - Double(level - 71) * 0.1
             default:
                 gridSize = 8
                 pointCount = 16
-                timeLimit = nil // 15.0
+                timeLimit = 15.0
             }
             
             return LevelConfig(
