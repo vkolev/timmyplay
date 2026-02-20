@@ -10,6 +10,8 @@ import AVFoundation
 
 
 struct ContentView: View {
+    @Environment(\.horizontalSizeClass) var sizeClass
+    
     @State var gamePoints: [GridPosition] = []
     @State var gridSize: Int
     @State var gameState: GameState = .playing
@@ -64,8 +66,9 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
             VStack {
+                let isCompact = sizeClass == .compact
                 Text("TimmyPlay")
-                    .font(.system(size: 66, weight: .heavy, design: .rounded))
+                    .font(.system(size: isCompact ? 45: 66, weight: .heavy, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
                             colors: [.black, .black.opacity(0.3)],
@@ -74,7 +77,7 @@ struct ContentView: View {
                         )
                     )
                     .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 3)
-                    .padding(.top, 30)
+                    .padding(.top, isCompact ? 10 : 30)
                 
                 GameView(intgridSize: $gridSize, gamePoints: $gamePoints, gameState: $gameState)
                     .id(viewID)
@@ -229,7 +232,11 @@ struct ContentView: View {
         self.gamePoints = Self.generateGamePoints(levels[currentLevelIndex])
         self.gridSize = levels[currentLevelIndex].gridSize
         self.viewID += 1
-        self.currentLevelIndex += 1
+        if (currentLevelIndex >= levels.count - 1) {
+            self.currentLevelIndex = self.currentLevelIndex
+        } else {
+            self.currentLevelIndex += 1
+        }
         gameState = .playing
     }
     

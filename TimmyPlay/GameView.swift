@@ -10,6 +10,8 @@ import AVFoundation
 
 
 struct GameView: View {
+    @Environment(\.horizontalSizeClass) var sizeClass
+    
     @Binding var intgridSize: Int
     @Binding var gamePoints: [GridPosition]
     @Binding var gameState: GameState
@@ -18,11 +20,12 @@ struct GameView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            let spacing: CGFloat = 20
+            let isCompact = sizeClass == .compact
+            let spacing: CGFloat = isCompact ? 10 : 20
             let availableSize = min(geometry.size.width,
                                     geometry.size.height)
             let totalSpacing = spacing * CGFloat(intgridSize - 1)
-            let cellSize = (availableSize - totalSpacing) / CGFloat(intgridSize)
+            let cellSize = isCompact ? 60 : (availableSize - totalSpacing) / CGFloat(intgridSize)
             VStack {
                 Grid(horizontalSpacing: spacing, verticalSpacing: spacing) {
                     ForEach(0..<intgridSize, id: \.self) { row in
