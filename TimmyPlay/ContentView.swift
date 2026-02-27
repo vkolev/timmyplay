@@ -104,6 +104,7 @@ struct ContentView: View {
             
             
             if useTimer {
+                
                 TimelineView(
                     .animation
                 ) { timeline in
@@ -112,6 +113,7 @@ struct ContentView: View {
                         0,
                         levels[currentLevelIndex].timeLimit! - elapsed
                     )
+                    let isCompact = sizeClass == .compact
                     
                     VStack {
                         HStack {
@@ -131,8 +133,8 @@ struct ContentView: View {
                             Spacer()
                             
                             
-                            Text(String(format: "Timer: %.0f seconds", remaining))
-                                .font(.system(size: 33, weight: .bold, design: .rounded))
+                            Text(String(format: "Timer: %.0f s", remaining))
+                                .font(.system(size: isCompact ? 23 : 33, weight: .bold, design: .rounded))
                                 .foregroundStyle(remaining < 5 ? .red : .black)
                                 .padding(.horizontal, 2)
                                 .padding(.vertical, 6)
@@ -141,7 +143,7 @@ struct ContentView: View {
                             
                             Text("Level \(levels[currentLevelIndex].number)")
                                 .font(
-                                    .system(size: 33, weight: .bold, design: .rounded)
+                                    .system(size: isCompact ? 23 : 33, weight: .bold, design: .rounded)
                                 )
                                 .padding(.horizontal, 30)
                         }
@@ -160,22 +162,23 @@ struct ContentView: View {
             } else {
                 VStack {
                     HStack {
-                            Button(action: {
-                                gameMode = .menu
-                            }) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundStyle(Color(.black))
-                                    .frame(width: 40, height: 40)
-                                    .background(.ultraThinMaterial, in: Circle())
-                                    .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
-                            }
-                            .padding(.leading, 20)
-                            .padding(.top, 20)
+                        let isCompact = sizeClass == .compact
+                        Button(action: {
+                            gameMode = .menu
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color(.black))
+                                .frame(width: 40, height: 40)
+                                .background(.ultraThinMaterial, in: Circle())
+                                .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
+                        }
+                        .padding(.leading, 20)
+                        .padding(.top, 20)
                             
                         Spacer()
                         Text("Level \(levels[currentLevelIndex].number)")
-                            .font(.system(size: 33, weight: .bold, design: .rounded))
+                            .font(.system(size: isCompact ? 23 : 33, weight: .bold, design: .rounded))
                             .padding(.trailing, 20)
                     }
                     .padding(.top, 20)
